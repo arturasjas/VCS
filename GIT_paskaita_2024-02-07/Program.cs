@@ -10,7 +10,7 @@ namespace GIT_paskaita_2024_02_07
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("SomeNiceTextHere");
+            Console.WriteLine("SomeNOTNiceTextHere");
         }
     }
 }
