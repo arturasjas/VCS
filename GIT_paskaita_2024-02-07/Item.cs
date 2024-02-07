@@ -6,16 +6,7 @@ using System.Threading.Tasks;
 
 namespace GIT_paskaita_2024_02_07
 {
-    internal class Program
+    internal class Item
     {
-        static void Main(string[] args)
-        {
-            
-        }
-    }
-
-    override string ToString()
-    {
-        return "A"
     }
 }
