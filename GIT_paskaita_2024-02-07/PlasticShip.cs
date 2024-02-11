@@ -26,7 +26,7 @@ namespace GIT_paskaita_2024_02_07
 
         override public string ToString()
         {
-            return "Pavadinimas: " + Name + " (" + Length + "x" + Height + ") " + HistoricYear + " m. (" + (HasStickers ? "lipdukai;" : "") + (IsPrepainted ? "dazytas;" : "") + (IsRC ? "RC valdymas;":"") + ")";
+            return "Pavadinimas: " + Name + " (" + Length + "x" + Height + ") " + HistoricYear + " m. (" + (HasStickers ? "lipdukai;" : "") + (IsPrepainted ? "dazytas;" : "") + (IsRC ? "RC valdymas;":"") + ") [" + Id + "]";
         }
     }
 }

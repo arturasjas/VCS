@@ -24,27 +24,26 @@ namespace GIT_paskaita_2024_02_07
         private static List<PlasticShip> plasticShips = new List<PlasticShip>();
         private static List<WoodenShip> woodenShips = new List<WoodenShip>();
 
-        private static string[] levelHeader = { "", "", "" };
+        private static string[] levelHeader = { "", "", "", "" };
 
-        private static List<Tuple<int, string>> shipMenu;
-        private static List<Tuple<int, ShortGuid>> shipIds;
+        private static List<Tuple<int, string, ShortGuid>> shipMenu;
 
-        private static List<Tuple<int, string>> CRUDmenu = new List<Tuple<int, string>>{
-            Tuple.Create( CLOSE, "## Uzdaryti programa"),
-            Tuple.Create( INSERT, "Itraukti nauja irasa" ),
-            Tuple.Create( LIST, "Spausdinti sarasa" ) };
+        private static List<Tuple<int, string, ShortGuid>> mainMenuList = new List<Tuple<int, string, ShortGuid>>{
+            Tuple.Create( CLOSE, "## Uzdaryti programa", ShortGuid.Empty),
+            Tuple.Create( INSERT, "Itraukti nauja irasa" , ShortGuid.Empty),
+            Tuple.Create( LIST, "Spausdinti sarasa" , ShortGuid.Empty) };
 
 
-        private static List<Tuple<int, string>> shipType = new List<Tuple<int, string>>{
-            Tuple.Create( CLOSE, "## Uzdaryti programa"),
-            Tuple.Create( WOODEN, "Mediniai laivai" ),
-            Tuple.Create( PLASTIC, "Plastikiniai laivai" )
+        private static List<Tuple<int, string, ShortGuid>> shipType = new List<Tuple<int, string, ShortGuid>>{
+            Tuple.Create( CLOSE, "## Uzdaryti programa", ShortGuid.Empty),
+            Tuple.Create( WOODEN, "Mediniai laivai" , ShortGuid.Empty),
+            Tuple.Create( PLASTIC, "Plastikiniai laivai", ShortGuid.Empty)
              };
 
-        private static List<Tuple<int, string>> updateMenu = new List<Tuple<int, string>>{
-            Tuple.Create( CLOSE, "## Uzdaryti programa"),
-            Tuple.Create( UPDATE, "Redaguoti" ),
-            Tuple.Create( DELETE, "Istrinti" )
+        private static List<Tuple<int, string, ShortGuid>> updateMenu = new List<Tuple<int, string, ShortGuid>>{
+            Tuple.Create( CLOSE, "## Uzdaryti programa", ShortGuid.Empty),
+            Tuple.Create( UPDATE, "Redaguoti" , ShortGuid.Empty),
+            Tuple.Create( DELETE, "Istrinti" , ShortGuid.Empty)
              };
 
         static void Main(string[] args)
@@ -55,7 +54,7 @@ namespace GIT_paskaita_2024_02_07
             if (selection == CLOSE)
                 closeProgram();
             else
-                shipCRUD(selection);
+                showMainMenu(selection);
         }
 
         private static void addDemoData()
@@ -82,9 +81,9 @@ namespace GIT_paskaita_2024_02_07
             }
             Console.ReadLine();
         }
-            private static void shipCRUD(int shipType)
+        private static void showMainMenu(int shipType)
         {
-            int selection = showMenu(CRUDmenu, 1).Item1;
+            int selection = showMenu(mainMenuList, 1).Item1;
             while (true)
             {
                 printHeader();
@@ -92,11 +91,10 @@ namespace GIT_paskaita_2024_02_07
                 {
                     case INSERT:
                         insertNewRecord(shipType);
-                        selection = showMenu(CRUDmenu, 1).Item1;
+                        selection = showMenu(mainMenuList, 1).Item1;
                         break;
                     case LIST:
                         listRecords(shipType);
-                        selection = showMenu(CRUDmenu, 1).Item1;
                         break;
                     case CLOSE:
                         closeProgram();
@@ -179,10 +177,12 @@ namespace GIT_paskaita_2024_02_07
         {
             generateShipList(shipType);
             Tuple<int,ShortGuid>shipSelection = showMenu(shipMenu, 2);
-
-            int selection = shipSelection.Item1;
             
-            switch (selection)
+            if (shipSelection.Item1 == CLOSE){
+                closeProgram();
+            }
+            
+            switch (showMenu(updateMenu, 3).Item1)
             {
                 case UPDATE:
                     updateRecord(shipType, shipSelection.Item2);
@@ -199,31 +199,45 @@ namespace GIT_paskaita_2024_02_07
         private static void generateShipList(int shipType)
         {
             int sequence = 1;
-            shipMenu = new List<Tuple<int, string>> { Tuple.Create(CLOSE, "## Uzdaryti programa") };
-            shipIds = new List<Tuple<int, ShortGuid>> { };
+            shipMenu = new List<Tuple<int, string, ShortGuid>> { Tuple.Create(CLOSE, "## Uzdaryti programa",ShortGuid.Empty) };
 
             if (shipType == WOODEN)
                 foreach (WoodenShip ship in woodenShips)
                 {
-                    shipMenu.Add(Tuple.Create(sequence, ship.ToString()));
-                    shipIds.Add(Tuple.Create(sequence++, ship.Id));
+                    shipMenu.Add(Tuple.Create(sequence++, ship.ToString(),ship.Id));
                 }
             else
                 foreach (PlasticShip ship in plasticShips)
                 {
-                    shipMenu.Add(Tuple.Create(sequence, ship.ToString()));
-                    shipIds.Add(Tuple.Create(sequence++, ship.Id));
+                    shipMenu.Add(Tuple.Create(sequence++, ship.ToString(), ship.Id));
                 }
         }
 
         private static void deleteRecord(int shipType, ShortGuid shipId)
         {
-            Console.WriteLine("DELETE: " + shipId);
+            Boolean canDelete = true;
+
+            if (shipType == WOODEN && !woodenShips.Find(ship => ship.Id.Equals(shipId)).CanEdit)
+                canDelete = false;
+            if (shipType == PLASTIC && !plasticShips.Find(ship => ship.Id.Equals(shipId)).CanEdit)
+                canDelete = false;
+
+            if (!canDelete)
+                Console.WriteLine(new string(' ',8) + "Trynimas siuo metu negalimas. Bandykite veliau.");
+            
+            if (shipType == WOODEN)
+                woodenShips.RemoveAll(ship => ship.Id.Equals(shipId));
+            else
+                plasticShips.RemoveAll(ship => ship.Id.Equals(shipId));
+            
+            Console.WriteLine("\n" + new string(' ', 8) + "Laivas istrintas.");
+            Console.ReadLine();
         }
 
         private static void updateRecord(int shipType, ShortGuid shipId)
         {
             Console.WriteLine("UPDATE: " + shipId);
+            Console.ReadLine();
         }
         private static void closeProgram()
         {
@@ -232,11 +246,16 @@ namespace GIT_paskaita_2024_02_07
             Environment.Exit(0);
         }
 
-        private static Tuple<int, ShortGuid> showMenu(List<Tuple<int, string>> selectionList,int level, Boolean getId = false)
+        private static Tuple<int, ShortGuid> showMenu(
+            List<Tuple<int, string, ShortGuid>> selectionList,
+            int level, 
+            Boolean getId = false)
         {
             int optionsCount = selectionList.Count;
-            int selected = 1;
+            int selected = Math.Min(optionsCount-1,1);
             bool done = false;
+            
+            levelHeader[level] = string.Empty;
             printHeader();
 
             while (!done)
@@ -246,11 +265,11 @@ namespace GIT_paskaita_2024_02_07
                     if (selected == select.Item1)
                     {
                         Console.ForegroundColor = ConsoleColor.Cyan;
-                        Console.Write("> ".PadLeft(level * 3));
+                        Console.Write(new string(' ',level * 2) + "> ");
                     }
                     else
                     {
-                        Console.Write("  ".PadLeft(level * 3));
+                        Console.Write(new string(' ',(level * 2) + 2));
                     }
                     Console.WriteLine(select.Item2);
                     Console.ResetColor();
@@ -271,12 +290,12 @@ namespace GIT_paskaita_2024_02_07
                 if (!done)
                     Console.CursorTop = Console.CursorTop - optionsCount;
             }
-            if (selected != CLOSE)
+            if (selected != CLOSE & level < 3)
             {
-                levelHeader[level]= "> ".PadLeft(level * 3) + selectionList.Find(selection => selection.Item1 == selected).Item2+"\n";                    
+                levelHeader[level]= new string (' ',level * 2)+"> " + selectionList.Find(selection => selection.Item1 == selected).Item2+"\n";                    
             }
 
-            return Tuple.Create(selected, ShortGuid.Empty);
+            return Tuple.Create(selected, selectionList.Find(ship => ship.Item1 == selected).Item3);
         }
 
         private static void printHeader()
